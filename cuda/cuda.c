@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
 
-    printf("n = %d; k = %d; TEMPO_EXECUCAO: %f ms; RESULTADO: %d\n", N, K, time, result);
+    printf("n = %d; k = %d; TEMPO_EXECUCAO: %f ms; RESULTADO: %d\n", n, k, time, result);
 
     return 0;
 }
