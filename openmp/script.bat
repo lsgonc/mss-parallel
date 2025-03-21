@@ -22,5 +22,3 @@ for %%t in (1 2 4 8) do (
         echo.
     )
 )
-
-pause
