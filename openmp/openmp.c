@@ -13,23 +13,40 @@ int MaxIncreasingSub(int arr[], int n, int k, int num_threads) {
         }
     }
 
-    clock_t start_time = clock();
     for (int i = 0; i < n; i++) {
         dp[i][1] = arr[i];
     }
 
-    // Define o número de threads antes das regiões paralelas
-    omp_set_num_threads(num_threads);
+    clock_t start_time = clock();
 
-    for (int i = 1; i < n; i++) {
-        #pragma omp parallel for
+    // Primeiras 256 iterações sequenciais (ou até n se n < 256)
+    int sequential_limit = (n < 256) ? n : 256;
+    for (int i = 1; i < sequential_limit; i++) {
         for (int j = 0; j < i; j++) {
             if (arr[j] < arr[i]) {
                 for (int l = 1; l <= k - 1; l++) {
                     if (dp[j][l] != -1) {
-                        #pragma omp critical
                         if (dp[i][l + 1] < dp[j][l] + arr[i]) {
                             dp[i][l + 1] = dp[j][l] + arr[i];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Restante das iterações em paralelo
+    if (n > 256) {
+        #pragma omp parallel for
+        for (int i = 256; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (arr[j] < arr[i]) {
+                    for (int l = 1; l <= k - 1; l++) {
+                        if (dp[j][l] != -1) {
+                            #pragma omp critical
+                            if (dp[i][l + 1] < dp[j][l] + arr[i]) {
+                                dp[i][l + 1] = dp[j][l] + arr[i];
+                            }
                         }
                     }
                 }
@@ -45,7 +62,7 @@ int MaxIncreasingSub(int arr[], int n, int k, int num_threads) {
     }
 
     clock_t end_time = clock();
-    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC * 1000; // Em milissegundos
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC * 1000;
 
     for (int i = 0; i < n; i++) {
         free(dp[i]);
@@ -67,6 +84,8 @@ int main(int argc, char *argv[]) {
     int n = atoi(argv[1]);
     int k = atoi(argv[2]);
     int num_threads = atoi(argv[3]);
+
+    omp_set_num_threads(num_threads);
 
     if (n <= 0 || k <= 0 || num_threads <= 0) {
         printf("Erro: n, k e threads devem ser positivos\n");
