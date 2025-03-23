@@ -1,4 +1,15 @@
 @echo off
+echo Compilando o programa OpenMP...
+
+gcc -fopenmp -o openmp.exe openmp.c
+if %ERRORLEVEL% NEQ 0 (
+    echo Erro na compilacao!
+    pause
+    exit /b %ERRORLEVEL%
+)
+echo Compilacao concluida com sucesso!
+echo.
+
 echo Testes para N fixo (5000), K variavel e Threads variavel
 
 for %%t in (1 2 4 8) do (
@@ -22,3 +33,5 @@ for %%t in (1 2 4 8) do (
         echo.
     )
 )
+
+echo Testes concluidos!
